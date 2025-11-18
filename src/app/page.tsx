@@ -24,10 +24,38 @@ export default function Home() {
 
   const isSearchMode = searchQuery.trim().length > 0;
   const isASCIIMode = mode === "ascii";
-  const { asciiText: titleASCII, isLoading: isLoadingTitle } = useASCIIArt(
-    "Pokemon Explorer",
+  
+  // Split title into two words and generate ASCII art for each separately
+  const { asciiText: pokemonASCII, isLoading: isLoadingPokemonTitle } = useASCIIArt(
+    "POKEMON",
     isASCIIMode
   );
+  const { asciiText: explorerASCII, isLoading: isLoadingExplorerTitle } = useASCIIArt(
+    "EXPLORER",
+    isASCIIMode
+  );
+  
+  // Combine both ASCII art strings side by side
+  const titleASCII = useMemo(() => {
+    if (!isASCIIMode) return "";
+    if (isLoadingPokemonTitle || isLoadingExplorerTitle) return "";
+    
+    const pokemonLines = pokemonASCII.split("\n");
+    const explorerLines = explorerASCII.split("\n");
+    const maxLines = Math.max(pokemonLines.length, explorerLines.length);
+    
+    const combined: string[] = [];
+    for (let i = 0; i < maxLines; i++) {
+      const pokemonLine = pokemonLines[i] || "";
+      const explorerLine = explorerLines[i] || "";
+      // Add some spacing between the two words
+      combined.push(pokemonLine + "  " + explorerLine);
+    }
+    
+    return combined.join("\n");
+  }, [pokemonASCII, explorerASCII, isLoadingPokemonTitle, isLoadingExplorerTitle, isASCIIMode]);
+  
+  const isLoadingTitle = isLoadingPokemonTitle || isLoadingExplorerTitle;
 
   // Fetch all Pokemon names for search (cached, pre-fetch for instant search)
   const { data: allPokemonNamesData, isLoading: isLoadingAllNames } = useQuery({
@@ -116,16 +144,12 @@ export default function Home() {
           <div className="flex items-center justify-between">
             {isASCIIMode ? (
               <div className="flex-1">
-                {isLoadingTitle ? (
-                  <div className="font-mono text-sm text-muted-foreground">[...]</div>
-                ) : (
-                  <div className="font-mono">
-                    {/* Title in ASCII box style matching mockup */}
-                    <pre className="text-sm sm:text-base whitespace-pre leading-tight">
-                      {`╔${"═".repeat(18)}╗\n║ POKEMON EXPLORER ║\n╚${"═".repeat(18)}╝`}
-                    </pre>
-                  </div>
-                )}
+                <div className="font-mono">
+                  {/* Title in ASCII art style like Pokemon names in details */}
+                  <pre className="text-xs sm:text-sm whitespace-pre leading-tight">
+                    {titleASCII}
+                  </pre>
+                </div>
               </div>
             ) : (
               <h1 className="text-4xl font-bold tracking-tight">
