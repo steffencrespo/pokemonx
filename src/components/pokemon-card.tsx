@@ -43,15 +43,21 @@ export function PokemonCard({ pokemon, onClick }: PokemonCardProps) {
     >
       <div className="flex flex-col items-center space-y-2">
         <div className="relative h-32 w-32 flex-shrink-0">
-          <img
-            src={pokemon.sprites.front_default || "/placeholder-pokemon.png"}
-            alt={pokemon.name}
-            className="h-full w-full object-contain transition-transform group-hover:scale-110"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = "/placeholder-pokemon.png";
-            }}
-          />
+          {pokemon.sprites.front_default ? (
+            <img
+              src={pokemon.sprites.front_default}
+              alt={pokemon.name}
+              className="h-full w-full object-contain transition-transform group-hover:scale-110"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = "none";
+              }}
+            />
+          ) : (
+            <div className="h-full w-full flex items-center justify-center bg-muted/20 rounded text-muted-foreground text-xs">
+              No Image
+            </div>
+          )}
         </div>
         <div className="w-full space-y-1">
           <p className="text-xs font-medium text-muted-foreground">

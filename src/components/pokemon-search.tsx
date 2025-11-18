@@ -24,7 +24,7 @@ export function PokemonSearch({
   }, [searchQuery, onSearchChange, debounceMs]);
 
   return (
-    <div className="relative w-full max-w-md">
+    <div className="relative w-full max-w">
       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="text"

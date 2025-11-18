@@ -6,6 +6,12 @@ import { getPokemonList, getPokemon, getAllPokemonNames } from "@/lib/pokeapi";
 import { PokemonSearch } from "@/components/pokemon-search";
 import { PokemonList } from "@/components/pokemon-list";
 import { PokemonDetails } from "@/components/pokemon-details";
+import { PokemonSearchASCII } from "@/components/ascii/pokemon-search-ascii";
+import { PokemonListASCII } from "@/components/ascii/pokemon-list-ascii";
+import { PokemonDetailsASCII } from "@/components/ascii/pokemon-details-ascii";
+import { useUIMode } from "@/contexts/ui-mode-context";
+import { Button } from "@/components/ui/button";
+import { useASCIIArt } from "@/hooks/use-ascii-art";
 import type { Pokemon } from "@/types/pokemon";
 
 const POKEMON_PER_PAGE = 20;
@@ -14,8 +20,14 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const { mode, toggleMode } = useUIMode();
 
   const isSearchMode = searchQuery.trim().length > 0;
+  const isASCIIMode = mode === "ascii";
+  const { asciiText: titleASCII, isLoading: isLoadingTitle } = useASCIIArt(
+    "Pokemon Explorer",
+    isASCIIMode
+  );
 
   // Fetch all Pokemon names for search (cached, pre-fetch for instant search)
   const { data: allPokemonNamesData, isLoading: isLoadingAllNames } = useQuery({
@@ -101,20 +113,63 @@ export default function Home() {
     <main className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">Pokemon Explorer</h1>
-          <PokemonSearch onSearchChange={setSearchQuery} />
+          <div className="flex items-center justify-between">
+            {isASCIIMode ? (
+              <div className="flex-1">
+                {isLoadingTitle ? (
+                  <div className="font-mono text-sm text-muted-foreground">[...]</div>
+                ) : (
+                  <div className="font-mono">
+                    {/* Title in ASCII box style matching mockup */}
+                    <pre className="text-sm sm:text-base whitespace-pre leading-tight">
+                      {`╔${"═".repeat(18)}╗\n║ POKEMON EXPLORER ║\n╚${"═".repeat(18)}╝`}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <h1 className="text-4xl font-bold tracking-tight">
+                Pokemon Explorer
+              </h1>
+            )}
+            <Button
+              onClick={toggleMode}
+              variant="outline"
+              className={isASCIIMode ? "font-mono" : ""}
+            >
+              {isASCIIMode ? "ASCII" : "Modern"}
+            </Button>
+          </div>
+          {isASCIIMode ? (
+            <PokemonSearchASCII onSearchChange={setSearchQuery} />
+          ) : (
+            <PokemonSearch onSearchChange={setSearchQuery} />
+          )}
         </div>
 
         {error && (
-          <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-destructive">
+          <div className={`${isASCIIMode ? "font-mono border border-destructive" : "rounded-lg border border-destructive bg-destructive/10"} p-4 text-destructive`}>
             Error loading Pokemon: {error instanceof Error ? error.message : "Unknown error"}
           </div>
         )}
 
         {isLoading || isSearchLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          <div className={`flex items-center justify-center py-12 ${isASCIIMode ? "font-mono" : ""}`}>
+            {isASCIIMode ? (
+              <div className="text-lg">[...] Loading...</div>
+            ) : (
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            )}
           </div>
+        ) : isASCIIMode ? (
+          <PokemonListASCII
+            pokemon={pokemon}
+            searchQuery={searchQuery}
+            onPokemonClick={handlePokemonClick}
+            onLoadMore={isSearchMode ? undefined : () => fetchNextPage()}
+            hasNextPage={isSearchMode ? false : (hasNextPage || false)}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         ) : (
           <PokemonList
             pokemon={pokemon}
@@ -126,11 +181,19 @@ export default function Home() {
           />
         )}
 
-        <PokemonDetails
-          pokemon={selectedPokemon}
-          open={isDetailsOpen}
-          onOpenChange={setIsDetailsOpen}
-        />
+        {isASCIIMode ? (
+          <PokemonDetailsASCII
+            pokemon={selectedPokemon}
+            open={isDetailsOpen}
+            onOpenChange={setIsDetailsOpen}
+          />
+        ) : (
+          <PokemonDetails
+            pokemon={selectedPokemon}
+            open={isDetailsOpen}
+            onOpenChange={setIsDetailsOpen}
+          />
+        )}
       </div>
     </main>
   );

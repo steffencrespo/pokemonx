@@ -111,18 +111,27 @@ export function PokemonDetails({
             {/* Image and Basic Info */}
             <div className="flex flex-col items-center space-y-4 sm:flex-row sm:items-start sm:space-x-6 sm:space-y-0">
               <div className="flex-shrink-0">
-                <img
-                  src={
-                    displayPokemon.sprites.front_default ||
-                    "/placeholder-pokemon.png"
-                  }
-                  alt={displayPokemon.name}
-                  className="h-48 w-48 object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/placeholder-pokemon.png";
-                  }}
-                />
+                {displayPokemon.sprites.front_default ? (
+                  <img
+                    src={displayPokemon.sprites.front_default}
+                    alt={displayPokemon.name}
+                    className="h-48 w-48 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = "none";
+                      // Show fallback
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = "flex";
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={`h-48 w-48 flex items-center justify-center bg-muted/20 rounded text-muted-foreground text-sm ${
+                    displayPokemon.sprites.front_default ? "hidden" : "flex"
+                  }`}
+                >
+                  No Image
+                </div>
               </div>
               <div className="flex-1 space-y-2 text-center sm:text-left">
                 <p className="text-sm font-medium text-muted-foreground">
