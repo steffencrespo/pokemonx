@@ -13,10 +13,10 @@ interface UIModeContextType {
 const UIModeContext = createContext<UIModeContextType | undefined>(undefined);
 
 export function UIModeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<UIMode>("modern");
+  const [mode, setMode] = useState<UIMode>("ascii");
 
   const toggleMode = () => {
-    setMode((prev) => (prev === "modern" ? "ascii" : "modern"));
+    setMode((prev) => (prev === "ascii" ? "modern" : "ascii"));
   };
 
   return (
